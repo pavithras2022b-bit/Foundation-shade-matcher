@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Foundation Finder • Home</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrapper">
+    <nav class="nav">
+      <div class="brand">Foundation Finder</div>
+      <div class="nav-menu">
+        <a href="index.html">Home</a>
+        <a href="quiz.html">Take Quiz</a>
+        <a href="upload.html">Upload Photo</a>
+        <a href="about.html">About Us</a>
+        <a href="contact.html">Contact</a>
+        <a href="matches.html">My Matches</a>
+      </div>
+      <button id="theme-toggle" style="background:none; border:none; font-size:20px; cursor:pointer;" title="Toggle Theme">🌓</button>
+    </nav>
+
+    <section class="center">
+      <div class="card fade-up hero-glow" style="text-align:center; max-width:760px">
+        <h1 class="gradient-text">Find Your Perfect Base</h1>
+        <p class="tagline">Answer 10 quick questions or upload a photo to get a tailored foundation match.</p>
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
+          <a class="btn accent" href="quiz.html">Take the Quiz</a>
+          <a class="btn secondary" href="upload.html">Upload Photo</a>
+          <a class="btn" href="about.html">Learn About Us</a>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer">© 2025 Foundation Finder</p>
+  </div>
+
+  <div id="chat-widget" style="display: none; position: fixed; bottom: 80px; right: 20px; width: 300px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); overflow: hidden; z-index: 1000; border: 1px solid #e5e7eb;">
+    <div style="background: var(--brand); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between;">
+      <span>💄 Beauty Advisor</span>
+      <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer;">✕</button>
+    </div>
+    <div id="chat-messages" style="height: 250px; padding: 15px; overflow-y: auto; background: #f9fafb; display: flex; flex-direction: column; gap: 10px;">
+      <div style="background: #e5e7eb; padding: 8px 12px; border-radius: 15px; align-self: flex-start; max-width: 80%;">
+        Hello! Ask me anything about your foundation or makeup tips! ✨
+      </div>
+    </div>
+    <div style="padding: 10px; border-top: 1px solid #eee; display: flex;">
+      <input type="text" id="user-input" placeholder="Type your question..." style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 20px; outline: none;">
+      <button onclick="sendMessage()" style="background: var(--accent); border: none; padding: 8px 15px; margin-left: 8px; border-radius: 20px; cursor: pointer;">➤</button>
+    </div>
+  </div>
+
+  <div id="robot-icon" style="position: fixed; bottom: 75px; right: 20px; width: 60px; height: 60px; z-index: 1001; display: none; pointer-events: none;">
+  <img src="robot-icon.jpg" alt="AI Robot" style="width: 100%; height: 100%; object-fit: contain;">
+  </div>
+  <button onclick="toggleChat()" style="position: fixed; bottom: 20px; right: 20px; background: var(--brand); color: white; width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 1000;">
+    💬
+  </button>
+
+  <script src="theme.js"></script>
+  <script>
+    // Chat & Robot Script
+    const chatWidget = document.getElementById('chat-widget');
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const robotIcon = document.getElementById('robot-icon');
+
+    function toggleChat() {
+      const isChatHidden = chatWidget.style.display === 'none';
+      chatWidget.style.display = isChatHidden ? 'block' : 'none';
+      robotIcon.style.display = isChatHidden ? 'block' : 'none';
+      
+      if (isChatHidden) {
+        robotIcon.classList.add('robot-float');
+      } else {
+        robotIcon.classList.remove('robot-float');
+      }
+    }
+
+    function sendMessage() {
+      const msg = userInput.value.trim();
+      if (!msg) return;
+
+      appendMessage(msg, 'user');
+      userInput.value = '';
+
+      const loadingId = 'loading-' + Date.now();
+      appendMessage('Thinking... 🤔', 'bot', loadingId);
+
+      setTimeout(() => {
+        document.getElementById(loadingId).remove();
+        let reply = "That's a great question! As an AI, I recommend checking our 'Take Quiz' page for personalized advice.";
+        if (msg.toLowerCase().includes('hello')) reply = "Hi there! How can I help you with your makeup today?";
+        if (msg.toLowerCase().includes('foundation')) reply = "Foundation is best applied starting from the center of your face and blending outwards!";
+        appendMessage(reply, 'bot');
+      }, 1000);
+    }
+
+    function appendMessage(text, sender, id = null) {
+      const div = document.createElement('div');
+      if (id) div.id = id;
+      div.style.padding = '8px 12px';
+      div.style.borderRadius = '15px';
+      div.style.maxWidth = '80%';
+      div.style.alignSelf = sender === 'user' ? 'flex-end' : 'flex-start';
+      div.style.background = sender === 'user' ? 'var(--accent)' : '#e5e7eb';
+      div.style.color = sender === 'user' ? '#000' : '#000';
+      div.textContent = text;
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Allow "Enter" to send
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>

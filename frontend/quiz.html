@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foundation Finder • Quiz</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrapper">
+    <nav class="nav">
+      <div class="brand">Foundation Finder</div>
+      <div class="nav-menu">
+        <a href="index.html">Home</a>
+        <a href="quiz.html" class="active">Take Quiz</a>
+        <a href="upload.html">Upload Photo</a>
+        <a href="contact.html">Contact</a>
+        <a href="matches.html">My Matches</a>
+      </div>
+    </nav>
+
+    <section class="card">
+      <h2>Find Your Perfect Foundation Match 💄</h2>
+      <div id="quiz-container"></div>
+      <button id="submitQuiz" class="btn accent">Submit Quiz</button>
+      <div id="quiz-result" class="result" style="display:none;"></div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCLuH8sXI6JaR-seKfSO1PYF1ux6zvD1Hw",
+      authDomain: "foundation-finder-3dd16.firebaseapp.com",
+      projectId: "foundation-finder-3dd16",
+      storageBucket: "foundation-finder-3dd16.firebasestorage.app",
+      messagingSenderId: "95783410327",
+      appId: "1:95783410327:web:afe1c287dd684a142ce7d2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const quizContainer = document.getElementById("quiz-container");
+    const submitBtn = document.getElementById("submitQuiz");
+    const resultBox = document.getElementById("quiz-result");
+
+    const quizQuestions = [
+      { q: "What is your skin type?", options: ["Oily", "Dry", "Combination", "Normal"] },
+      { q: "How does your skin react to the sun?", options: ["Tan easily", "Burn easily", "Both", "Neither"] },
+      { q: "Preferred foundation coverage?", options: ["Light", "Medium", "Full"] },
+      { q: "Preferred finish?", options: ["Matte", "Dewy", "Natural"] },
+      { q: "Do you have redness or yellow tones?", options: ["Red", "Yellow", "Both", "None"] },
+      { q: "Preferred texture?", options: ["Liquid", "Cream", "Powder"] },
+      { q: "How long should your foundation last?", options: ["Few hours", "All day", "Occasional"] },
+      { q: "What is your biggest concern?", options: ["Acne", "Dryness", "Dark spots", "None"] },
+      { q: "What undertone do your veins show?", options: ["Green", "Blue", "Neutral"] },
+      { q: "Do you prefer high-end or affordable brands?", options: ["High-end", "Affordable", "Mix of both"] },
+    ];
+
+    function renderQuiz() {
+      // This line fails if the <div id="quiz-container"> is missing from HTML
+      quizContainer.innerHTML = quizQuestions
+        .map((item, i) => `
+          <div class="question">
+            <p><strong>${i + 1}. ${item.q}</strong></p>
+            ${item.options
+              .map(opt => `<label><input type="radio" name="q${i}" value="${opt}"> ${opt}</label>`)
+              .join("<br>")}
+          </div>
+        `)
+        .join("<br>");
+    }
+
+    renderQuiz();
+
+    submitBtn.addEventListener("click", async () => {
+      const answers = [];
+      for (let i = 0; i < quizQuestions.length; i++) {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selected) return alert(`Please answer question ${i + 1}`);
+        answers.push(selected.value);
+      }
+
+      resultBox.style.display = "block";
+      resultBox.innerHTML = `
+      <div class="spinner"></div>
+      <p class="loading-text">Finding your perfect match...</p>
+      `;
+
+      try {
+        const res = await fetch("http://localhost:5000/quiz", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answers })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Server error");
+
+        const savedMatches = JSON.parse(localStorage.getItem('foundationMatches')) || [];
+        savedMatches.push(data.recommendations);
+        localStorage.setItem('foundationMatches', JSON.stringify(savedMatches));
+
+        const r = data.recommendations;
+
+        resultBox.innerHTML = `
+          <h3>💖 Your Personalized Foundation Match 💖 <button onclick="speakQuizResult('${r.skinTone}', '${r.undertone}', '${r.finish}')" style="background:none; border:none; cursor:pointer; font-size:24px;" title="Hear your match">🔊</button></h3>
+          <ul>
+            <li><strong>Skin Tone:</strong> ${r.skinTone}</li>
+            <li><strong>Undertone:</strong> ${r.undertone}</li>
+            <li><strong>Coverage:</strong> ${r.coverage}</li>
+            <li><strong>Finish:</strong> ${r.finish}</li>
+          </ul>
+          <h4>✨ Tips:</h4>
+          <ul>${r.tips.map(t => `<li>${t}</li>`).join("")}</ul>
+          <h4>🛍 Recommended Products:</h4>
+          <ul>${r.links.map(link => `<li><a href="${link}" target="_blank">${link}</a></li>`).join("")}</ul>
+          
+           <div style="margin-top: 15px;">
+             <strong>Share your match:</strong>
+             <a href="https://twitter.com/intent/tweet?text=I found my perfect foundation match with Foundation Finder!" target="_blank" style="margin-right: 10px; color: var(--accent);">Share on X</a>
+             <a href="https://www.facebook.com/sharer/sharer.php?u=${window.location.href}" target="_blank" style="color: var(--accent);">Share on Facebook</a>
+          </div>
+        `;
+
+        await addDoc(collection(db, "quizResults"), {
+          answers,
+          recommendations: r,
+          createdAt: new Date().toISOString()
+        });
+      } catch (err) {
+        console.error(err);
+        resultBox.innerHTML = `<p style="color:red"><strong>Error connecting to server.</strong><br>Please ensure the backend is running.</p>`;
+      }
+    });
+    // 🔊 Text-to-Speech Function for Quiz
+    window.speakQuizResult = (skin, undertone, finish) => {
+      const text = `Based on your quiz, you have ${skin} skin with ${undertone} undertones. We recommend a ${finish} finish foundation.`;
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    };
+  </script>
+</body>
+</html>

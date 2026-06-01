@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foundation Finder • My Matches</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrapper">
+    <nav class="nav">
+      <div class="brand">Foundation Finder</div>
+      <div class="nav-menu">
+        <a href="index.html">Home</a>
+        <a href="quiz.html">Take Quiz</a>
+        <a href="upload.html">Upload Photo</a>
+        <a href="matches.html" class="active">My Matches</a> <a href="contact.html">Contact</a>
+      </div>
+    </nav>
+
+    <section class="card">
+      <h2>💖 My Saved Matches</h2>
+      <p>Here are all your previous foundation recommendations.</p>
+      
+      <div id="matches-container" style="margin-top: 30px;">
+        <em>Loading your history...</em>
+      </div>
+
+      <button id="clearHistory" class="btn secondary" style="margin-top: 20px; display: none;">Clear History</button>
+    </section>
+  </div>
+
+  <script>
+    const container = document.getElementById('matches-container');
+    const clearBtn = document.getElementById('clearHistory');
+
+    function loadMatches() {
+      // 1. Read from localStorage
+      const savedMatches = JSON.parse(localStorage.getItem('foundationMatches')) || [];
+
+      // 2. Handle empty state
+      if (savedMatches.length === 0) {
+        container.innerHTML = "<p>You haven't saved any matches yet. Try the <a href='quiz.html' style='color: var(--accent)'>Quiz</a> or <a href='upload.html' style='color: var(--accent)'>Photo Upload</a>!</p>";
+        clearBtn.style.display = "none";
+        return;
+      }
+
+      // 3. Render matches (newest first)
+      clearBtn.style.display = "inline-block";
+      container.innerHTML = savedMatches.slice().reverse().map((match, index) => {
+        let content = "";
+
+        // CHECK: Is this from the QUIZ? (It has 'skinTone' property)
+        if (match.skinTone) {
+           content = `
+             <div class="match-item quiz-match">
+               <span class="badge">🧩 Quiz Result</span>
+               <h4>${match.coverage} Coverage / ${match.finish} Finish</h4>
+               <ul>
+                  <li><strong>Undertone:</strong> ${match.undertone}</li>
+                  <li><strong>Top Pick:</strong> <a href="${match.links[0]}" target="_blank">View Product</a></li>
+               </ul>
+             </div>
+           `;
+        } 
+        // CHECK: Is this from UPLOAD? (It has 'predicted_shade' property)
+        else if (match.predicted_shade) {
+           const info = match.shade_info || {};
+           const hex = info.hex || info.hex_values || "#ccc";
+           content = `
+             <div class="match-item upload-match">
+               <span class="badge">📸 Photo Result</span>
+               <h4>${info.Brand || 'Unknown'} - ${match.predicted_shade}</h4>
+               <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
+                  Match Color: 
+                  <div style="width: 40px; height: 20px; background-color: ${hex}; border-radius: 4px; border: 1px solid #555;"></div>
+               </div>
+               <a href="${info.url || '#'}" target="_blank" style="color: var(--accent)">View Product →</a>
+             </div>
+           `;
+        }
+
+        return content;
+      }).join('<hr style="margin: 20px 0; opacity: 0.3;">');
+    }
+
+    // Initial Load
+    loadMatches();
+
+    // Clear History Handler
+    clearBtn.addEventListener('click', () => {
+      if (confirm("Are you sure you want to delete all saved matches?")) {
+        localStorage.removeItem('foundationMatches');
+        loadMatches();
+      }
+    });
+  </script>
+</body>
+</html>

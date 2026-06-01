@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foundation Finder • Login</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Specific styles for the auth container */
+    .auth-container { max-width: 400px; margin: 40px auto; }
+    .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; }
+    .auth-tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; color: var(--muted); }
+    .auth-tab.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <nav class="nav">
+      <div class="brand">Foundation Finder</div>
+      <div class="nav-menu">
+        <a href="index.html">Home</a>
+        <a href="quiz.html">Take Quiz</a>
+        <a href="upload.html">Upload Photo</a>
+        <a href="login.html" class="active">Login</a>
+      </div>
+      <button id="theme-toggle" style="background:none; border:none; font-size:20px; cursor:pointer;">🌓</button>
+    </nav>
+
+    <section class="card auth-container fade-up">
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchTab('signin')">Sign In</div>
+        <div class="auth-tab" onclick="switchTab('signup')">Sign Up</div>
+      </div>
+
+      <form id="signinForm" class="auth-form active form">
+        <h2 style="text-align:center; margin-bottom: 25px;">Welcome Back! 👋</h2>
+        
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="signin-email" class="input" placeholder="Email Address" required>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="signin-password" class="input" placeholder="Password" required>
+        </div>
+
+        <div class="auth-links">
+          <label><input type="checkbox"> Remember me</label>
+          <a href="#">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn accent" style="width:100%; margin-top: 20px;">Sign In</button>
+
+        <div class="divider">OR</div>
+        
+        <button type="button" class="btn btn-google">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+          Sign in with Google
+        </button>
+      </form>
+
+      <form id="signupForm" class="auth-form form">
+        <h2 style="text-align:center; margin-bottom: 25px;">Create Account 🚀</h2>
+        
+        <div class="input-group">
+           <i class="fas fa-user"></i>
+           <input type="text" id="signup-name" class="input" placeholder="Full Name">
+        </div>
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="signup-email" class="input" placeholder="Email Address" required>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="signup-password" class="input" placeholder="Choose Password" required minlength="6">
+        </div>
+
+        <button type="submit" class="btn accent" style="width:100%; margin-top: 20px;">Create Account</button>
+      </form>
+
+      <p id="auth-msg" style="text-align:center; margin-top:15px; color: #eab308; font-size: 14px;"></p>
+    </section>
+    <section class="testimonials-section fade-up" style="animation-delay: 0.2s;">
+      <h3>Trusted by 10,000+ Beauties 💖</h3>
+      <div class="testimonial-grid">
+        <div class="testimonial-card">
+          <div class="stars">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-text">"I've wasted so much money on the wrong shades. This AI nailed my Fenty match perfectly on the first try! Obsessed."</p>
+          <div class="user-info">
+            <div class="user-avatar">SJ</div>
+            <span>Sarah J.</span>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">
+             <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-text">"The quiz asked things I never considered about my skin undertone. The recommendations were spot on."</p>
+          <div class="user-info">
+            <div class="user-avatar">AM</div>
+            <span>Priya M.</span>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars">
+             <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+          </div>
+          <p class="testimonial-text">"Super easy to use. I love that I can save my matches and look them up when I'm actually at Sephora."</p>
+          <div class="user-info">
+            <div class="user-avatar">TL</div>
+            <span>Tasha L.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    ```
+
+---
+
+
+  </div>
+
+  <script src="theme.js"></script>
+  <script type="module" src="auth.js"></script>
+  <script>
+    // Simple tab switcher script
+    function switchTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+      
+      if (tab === 'signin') {
+        document.querySelectorAll('.auth-tab')[0].classList.add('active');
+        document.getElementById('signinForm').classList.add('active');
+      } else {
+        document.querySelectorAll('.auth-tab')[1].classList.add('active');
+        document.getElementById('signupForm').classList.add('active');
+      }
+      document.getElementById('auth-msg').textContent = ''; // Clear errors on switch
+    }
+  </script>
+</body>
+</html>

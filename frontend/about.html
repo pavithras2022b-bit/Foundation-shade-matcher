@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foundation Finder • About Us</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrapper">
+    <nav class="nav">
+      <div class="brand">Foundation Finder</div>
+      <div class="nav-menu">
+        <a href="index.html">Home</a>
+        <a href="quiz.html">Take Quiz</a>
+        <a href="upload.html">Upload Photo</a>
+        <a href="about.html" class="active">About Us</a>
+        <a href="contact.html">Contact</a>
+        <a href="matches.html">My Matches</a>
+      </div>
+      <button id="theme-toggle" style="background:none; border:none; font-size:20px; cursor:pointer;">🌓</button>
+    </nav>
+
+    <section class="card">
+      <h2>About Foundation Finder ✨</h2>
+      <p>Finding the perfect foundation shade shouldn't be a guessing game. We built Foundation Finder to combine professional makeup artist knowledge with cutting-edge AI technology, making shade-matching simple, accurate, and private.</p>
+
+      <div class="features-grid">
+        <div class="feature-item">
+          <span class="feature-icon">🤖</span>
+          <h3>AI-Powered</h3>
+          <p>Our Python machine learning model analyzes your unique skin tone from photos.</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🔒</span>
+          <h3>Private & Secure</h3>
+          <p>Your photos are analyzed instantly and never shared with third parties.</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">💄</span>
+          <h3>Smart Matching</h3>
+          <p>We don't just guess; we use a vast dataset to find your exact brand match.</p>
+        </div>
+      </div>
+
+      <div style="margin-top: 40px; text-align: center;">
+        <p>Ready to find your perfect match?</p>
+        <div style="display:flex; gap:12px; justify-content:center; margin-top:20px;">
+           <a href="quiz.html" class="btn accent">Take the Quiz</a>
+           <a href="upload.html" class="btn secondary">Upload a Photo</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="chat-widget" style="display: none; position: fixed; bottom: 80px; right: 20px; width: 300px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); overflow: hidden; z-index: 1000; border: 1px solid #e5e7eb;">
+    <div style="background: var(--brand); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between;">
+      <span>💄 Beauty Advisor</span>
+      <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer;">✕</button>
+    </div>
+    <div id="chat-messages" style="height: 250px; padding: 15px; overflow-y: auto; background: #f9fafb; display: flex; flex-direction: column; gap: 10px;">
+      <div style="background: #e5e7eb; padding: 8px 12px; border-radius: 15px; align-self: flex-start; max-width: 80%;">
+        Hello! Ask me anything about your foundation or makeup tips! ✨
+      </div>
+    </div>
+    <div style="padding: 10px; border-top: 1px solid #eee; display: flex;">
+      <input type="text" id="user-input" placeholder="Type your question..." style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 20px; outline: none;">
+      <button onclick="sendMessage()" style="background: var(--accent); border: none; padding: 8px 15px; margin-left: 8px; border-radius: 20px; cursor: pointer;">➤</button>
+    </div>
+  </div>
+
+  <button onclick="toggleChat()" style="position: fixed; bottom: 20px; right: 20px; background: var(--brand); color: white; width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 1000;">
+    💬
+  </button>
+
+  <script src="theme.js"></script>
+  <script>
+    // Chat Widget Script
+    const chatWidget = document.getElementById('chat-widget');
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+
+    function toggleChat() {
+      chatWidget.style.display = chatWidget.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function sendMessage() {
+      const msg = userInput.value.trim();
+      if (!msg) return;
+      appendMessage(msg, 'user');
+      userInput.value = '';
+      const loadingId = 'loading-' + Date.now();
+      appendMessage('Thinking... 🤔', 'bot', loadingId);
+      setTimeout(() => {
+        document.getElementById(loadingId).remove();
+        let reply = "That's a great question! As an AI, I recommend checking our 'Take Quiz' page for personalized advice.";
+        if (msg.toLowerCase().includes('hello')) reply = "Hi there! How can I help you with your makeup today?";
+        if (msg.toLowerCase().includes('foundation')) reply = "Foundation is best applied starting from the center of your face and blending outwards!";
+        appendMessage(reply, 'bot');
+      }, 1000);
+    }
+
+    function appendMessage(text, sender, id = null) {
+      const div = document.createElement('div');
+      if (id) div.id = id;
+      div.style.padding = '8px 12px';
+      div.style.borderRadius = '15px';
+      div.style.maxWidth = '80%';
+      div.style.alignSelf = sender === 'user' ? 'flex-end' : 'flex-start';
+      div.style.background = sender === 'user' ? 'var(--accent)' : '#e5e7eb';
+      div.style.color = sender === 'user' ? '#000' : '#000';
+      div.textContent = text;
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>

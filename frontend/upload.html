@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foundation Finder • Upload</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrapper">
+    <nav class="nav">
+      <div class="brand">Foundation Finder</div>
+      <div class="nav-menu">
+        <a href="index.html">Home</a>
+        <a href="quiz.html">Take Quiz</a>
+        <a href="upload.html" class="active">Upload Photo</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </nav>
+
+    <section class="card">
+      <h2>Upload Your Photo 📸</h2>
+      <p>Upload a clear photo to get foundation recommendations based on your skin tone.</p>
+
+      <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="imageFile" name="image" accept="image/*" required />
+        <button type="submit" class="btn accent">Upload & Analyze</button>
+      </form>
+
+      <div id="upload-result" class="result" style="display:none;"></div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyCLuH8sXI6JaR-seKfSO1PYF1ux6zvD1Hw",
+      authDomain: "foundation-finder-3dd16.firebaseapp.com",
+      projectId: "foundation-finder-3dd16",
+      storageBucket: "foundation-finder-3dd16.firebasestorage.app",
+      messagingSenderId: "95783410327",
+      appId: "1:95783410327:web:afe1c287dd684a142ce7d2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const uploadForm = document.getElementById("uploadForm");
+    const resultBox = document.getElementById("upload-result");
+
+    uploadForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const file = document.getElementById("imageFile").files[0];
+      if (!file) return alert("Please upload an image first!");
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      resultBox.style.display = "block";
+      resultBox.innerHTML = `
+      <div class="spinner"></div>
+      <p class="loading-text">Analyzing your unique skin tone...</p>
+`     ;
+
+      try {
+        const res = await fetch("http://localhost:5000/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Server error");
+
+        // ✅ NEW: Save result to localStorage
+        const savedMatches = JSON.parse(localStorage.getItem('foundationMatches')) || [];
+        // Add a timestamp so we know when this match was found
+        const matchToSave = { ...data.recommendations, type: 'upload', date: new Date().toISOString() };
+        savedMatches.push(matchToSave);
+        localStorage.setItem('foundationMatches', JSON.stringify(savedMatches));
+
+        const r = data.recommendations || {};
+        const shade = r.predicted_shade || "Unknown";
+        const avg = Array.isArray(r.avg_rgb) ? r.avg_rgb.map(n => Number(n).toFixed(0)).join(", ") : "-";
+        const info = r.shade_info || {};
+
+        const brand = info.brand || info.Brand || "-";
+        const product = info.product || info.Product || "-";
+        const url = info.URL || info.url || null;
+        const hex = info.hex || info.hex_values || "-";
+
+        // Also fixed a small bug: r.Hex was undefined, should use the 'hex' variable we just defined
+        resultBox.innerHTML = `
+          <h3>💄 Your Foundation Match <button onclick="speakResult('${shade}', '${brand}', '${product}')" style="background:none; border:none; cursor:pointer; font-size:24px;" title="Hear your match">🔊</button></h3>
+          <ul>
+            <li><strong>Predicted Shade:</strong> ${shade}</li>
+            <li><strong>Avg RGB:</strong> ${avg}</li>
+            <li><strong>Brand:</strong> ${brand}</li>
+            <li><strong>Product:</strong> ${product}</li>
+            <li><strong>Hex:</strong> ${hex}</li>
+            <li><strong>Color Swatch:</strong> <div style="width: 50px; height: 25px; background-color: ${hex}; border: 1px solid #ccc; border-radius: 5px;"></div></li>
+            ${url ? `<li><strong>Link:</strong> <a href="${url}" target="_blank">${url}</a></li>` : ""}
+          </ul>
+          <div style="margin-top: 15px;">
+            <strong>Share your match:</strong>
+            <a href="https://twitter.com/intent/tweet?text=I found my perfect foundation match (${product}) with Foundation Finder!" target="_blank" style="margin-right: 10px; color: var(--accent);">Share on X</a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=${url}" target="_blank" style="color: var(--accent);">Share on Facebook</a>
+          </div>
+        `;
+      } catch (err) {
+        console.error(err);
+        resultBox.innerHTML = `<p style="color:red">Error connecting to server. Please ensure backend is running.</p>`;
+      }
+    });
+    // 🔊 Text-to-Speech Function
+    window.speakResult = (shade, brand, product) => {
+      const text = `Your perfect foundation match is ${brand} ${product}, in shade ${shade}.`;
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    };
+  </script>
+</body>
+</html>

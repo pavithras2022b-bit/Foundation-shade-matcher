@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foundation Finder • Contact</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrapper">
+    <nav class="nav">
+      <div class="brand">Foundation Finder</div>
+      <div class="nav-menu">
+        <a href="index.html">Home</a>
+        <a href="quiz.html">Take Quiz</a>
+        <a href="upload.html">Upload Photo</a>
+        <a href="contact.html" class="active">Contact</a>
+        <a href="matches.html">My Matches</a>
+      </div>
+      <button id="theme-toggle" style="background:none; border:none; font-size:20px; cursor:pointer;">🌓</button>
+    </nav>
+
+    <section class="card">
+      <h2>Contact Us 📬</h2>
+      <p>Have questions or feedback? We'd love to hear from you.</p>
+
+      <form id="contactForm" class="form">
+        <div class="row">
+          <input type="text" id="name" class="input" placeholder="Your Name" required />
+          <input type="email" id="email" class="input" placeholder="Your Email" required />
+        </div>
+        <textarea id="message" class="textarea" placeholder="Your Message" required></textarea>
+        <button type="submit" class="btn accent">Send Message</button>
+      </form>
+
+      <div id="contact-result" class="result" style="display:none; margin-top: 20px;"></div>
+    </section>
+  </div>
+
+  <script src="theme.js"></script>
+  <script>
+    const contactForm = document.getElementById('contactForm');
+    const resultBox = document.getElementById('contact-result');
+
+    contactForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const message = document.getElementById('message').value;
+
+      resultBox.style.display = 'block';
+      resultBox.innerHTML = '<em>Sending your message...</em>';
+      resultBox.style.color = 'var(--ink)';
+
+      try {
+        const res = await fetch('http://localhost:5000/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, message })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          resultBox.innerHTML = '✅ Message sent successfully! We will get back to you soon.';
+          resultBox.style.color = 'green';
+          contactForm.reset(); // Clear the form
+        } else {
+          throw new Error(data.error || 'Failed to send');
+        }
+      } catch (err) {
+        console.error(err);
+        resultBox.innerHTML = '❌ Error sending message. Please ensure backend is running.';
+        resultBox.style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>
